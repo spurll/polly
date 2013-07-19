@@ -1,17 +1,45 @@
 from argparse import ArgumentParser
 from datetime import datetime
+from email.mime.text import MIMEText
+from getpass import getpass
+from smtplib import SMTP
 from time import sleep
 
 from requests import get
 
 
 DELAY = 60
+SMTPHOST = 'smtp.gmail.com:587'
 
 
-def poll(address, delay=DELAY, silent=False):
+def poll(address, delay=DELAY, silent=False, recipients=None, user=None,
+         password=None, host=SMTPHOST, bcc=False):
     """
     Poll a website, returning once the contents of the website have changed.
+
+    address: The address to poll.
+    delay: The delay (in seconds) between each poll.
+    silent: Don't print alerts
+    recipients: The list of email recipients.
+    user: The user account for emailing (if not given, a prompt will be used).
+    password: The password for emailing (if not given, a prompt will be used).
+    host: The smtp host.
+    bcc: Whether to bcc people
     """
+    if recipients:
+        if user is None:
+            user = getpass('user: ')
+
+        if password is None:
+            password = getpass('password: ')
+
+        # test smtp login
+        smtp = SMTP(host)
+        smtp.starttls()
+        smtp.login(user, password)
+
+        smtp.close()
+
     if '://' not in address:  # No protocol given, default to http
         address = 'http://{}'.format(address)
 
@@ -28,6 +56,23 @@ def poll(address, delay=DELAY, silent=False):
 
         sleep(delay)
 
+    if recipients:
+        smtp = SMTP(host)
+        smtp.starttls()
+        smtp.login(user, password)
+
+        message = MIMEText("A change has occured at: {}".format(address))
+        message['Subject'] = "A website you were watching has been updated"
+
+        if bcc:
+            for recipient in recipients:
+                smtp.sendmail(user, [recipient], message.as_string())
+        else:
+            message['To'] = ', '.join(recipients)
+            smtp.sendmail(user, [recipient], message.as_string())
+
+        smtp.close()
+
     return True
 
 
@@ -38,10 +83,23 @@ def main():
                         help="Time (in seconds) to delay between polls.")
     parser.add_argument('--silent', action='store_true',
                         help="Don't display alerts.")
+    parser.add_argument('--mail', '-m', dest='recipients', action='append',
+                        help="An address to email when polling is finished "
+                        "(flag can be used multiple times)")
+    parser.add_argument('--host', default=SMTPHOST,
+                        help="The SMTP host to use for emailing.")
+    parser.add_argument('--user', '-u', default=None,
+                        help="The username for SMTP login.")
+    parser.add_argument('--password', '-p', default=None,
+                        help="The password for SMTP login.")
+    parser.add_argument('--bcc', action='store_true',
+                        help="BCC recipients instead of putting names in 'To'")
 
     args = parser.parse_args()
 
-    poll(args.address, delay=args.delay, silent=args.silent)
+    poll(args.address, delay=args.delay, silent=args.silent,
+         recipients=args.recipients, user=args.user, password=args.password,
+         host=args.host, bcc=args.bcc)
 
 
 if __name__ == '__main__':
