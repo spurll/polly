@@ -13,17 +13,17 @@ def poll(address, delay=WAIT):
     """
     if '://' not in address:  # No protocol given, default to http
         address = 'http://{}'.format(address)
-        
+
     contents = get(address).text
-    
+
     while True:
         new_contents = get(address).text
-        
+
         if contents != new_contents:
             break
-            
+
         wait(delay)
-        
+
     return True
 
 def main():
@@ -31,9 +31,9 @@ def main():
     parser.add_argument('address', help="The address to poll"):
     parser.add_argument('--delay', type=int, default=WAIT,
                         help="Time (in seconds) to delay between polls.")
-    
+
     args = parser.parse_args()
-    
+
     poll(args.address, delay=args.delay)
 
 
