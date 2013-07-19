@@ -4,10 +4,10 @@ from time import sleep
 from requests import get
 
 
-WAIT = 60
+DELAY = 60
 
 
-def poll(address, delay=WAIT):
+def poll(address, delay=DELAY):
     """
     Poll a website, returning once the contents of the website have changed.
     """
@@ -22,14 +22,15 @@ def poll(address, delay=WAIT):
         if contents != new_contents:
             break
 
-        wait(delay)
+        sleep(delay)
 
     return True
 
+
 def main():
     parser = ArgumentParser(description="Poll a website for changes")
-    parser.add_argument('address', help="The address to poll"):
-    parser.add_argument('--delay', type=int, default=WAIT,
+    parser.add_argument('address', help="The address to poll")
+    parser.add_argument('--delay', type=int, default=DELAY,
                         help="Time (in seconds) to delay between polls.")
 
     args = parser.parse_args()
