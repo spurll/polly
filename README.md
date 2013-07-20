@@ -24,20 +24,7 @@ Unless modified using the ```--eternal``` flag, polly will quit upon detecting a
 
 triggers
 --------
-Polly is designed to trigger actions on changes. Triggers can be loaded
-from a file using the ```--trigger_file``` argument.
-```
-python polly.py ADDRESS --trigger_file FILEPATH
-```
-```--trigger_file``` may be passed multiple times. The file should be a
-json-formatted file with the following structure:
-```
-{
-    TRIGGER_NAME: OPTIONS,
-    ...
-    TRIGGER_NAME: OPTIONS
-}
-```
+Polly is designed to trigger actions on changes. Triggers can be passed as a dict in the settings file, under the keyword ```triggers```.
 
 Currently, the only supported trigger is the Mail Trigger. It's options
 are as follows:
@@ -73,3 +60,15 @@ Username and password can be entered securely in a prompt, or using the ```--use
 The ```--bcc``` flag forces Polly to use bccfor sending to multiple addresses
 
 Don't worry, Polly will check your login credentials at startup
+
+formatters
+----------
+Formatters provide a way for polly to format site data, so that subjections of a page may be watched.
+
+A formatter can be passed in in the settings file under the keyword ```formatter```
+
+Currently, the only supported formatted is the RegexFormatter, which applies a regex to the contents.
+It may be directly invoked using the ```--regex``` argument.
+
+It's sole argument is the expression its comparing against. If groups are used, the groups will be returned,
+otherwise, the matching's success will be returned.
