@@ -22,9 +22,40 @@ Unless silenced using the ```--silence``` flag, polly will write an alert to std
 
 Unless modified using the ```--eternal``` flag, polly will quit upon detecting a change
 
+triggers
+--------
+Polly is designed to trigger actions on changes. Triggers can be loaded
+from a file using the ```--trigger_file``` argument.
+```
+python polly.py ADDRESS --trigger_file FILEPATH
+```
+```--trigger_file``` may be passed multiple times. The file should be a
+json-formatted file with the following structure:
+```
+{
+    TRIGGER_NAME: OPTIONS,
+    ...
+    TRIGGER_NAME: OPTIONS
+}
+```
+
+Currently, the only supported trigger is the Mail Trigger. It's options
+are as follows:
+{
+    "mail": {
+        "recipiencts": [LIST OF RECIPIENTS],
+        "bcc": true or false,  # should you put recipients in the bcc or to field
+        "username": LOGIN_USERNAME,  # if not given, it will be prompted for
+        "password": LOGIN_PASSWORD,  # if not given, it will be prompted for
+        "host": SMTP_HOST,  # defaults to gmail's host address
+        "subject": "A CUSTOM SUBJECT FOR THE EMAIL"
+    }
+}
+
 email
 -----
-Polly can email you when polling is finished.
+As emailing is the most likely trigger to be used, it also can be added
+directly from the command line.
 
 To add an address to email, use the ```--mail``` argument.
 ```
