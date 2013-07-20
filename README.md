@@ -20,6 +20,8 @@ python polly.py ADDRESS --delay TIME_IN_SECONDS
 
 Unless silenced using the ```--silence``` flag, polly will write an alert to stdout every time it runs
 
+Unless modified using the ```--eternal``` flag, polly will quit upon detecting a change
+
 email
 -----
 Polly can email you when polling is finished.
