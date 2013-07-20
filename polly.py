@@ -13,13 +13,14 @@ SMTPHOST = 'smtp.gmail.com:587'
 
 
 def poll(address, delay=DELAY, silent=False, recipients=None, user=None,
-         password=None, host=SMTPHOST, bcc=False):
+         password=None, host=SMTPHOST, bcc=False, eternal=False):
     """
     Poll a website, returning once the contents of the website have changed.
 
     address: The address to poll.
     delay: The delay (in seconds) between each poll.
     silent: Don't print alerts
+    eternal: Don't quit when the site changes (just send the email)
     recipients: The list of email recipients.
     user: The user account for emailing (if not given, a prompt will be used).
     password: The password for emailing (if not given, a prompt will be used).
@@ -49,31 +50,38 @@ def poll(address, delay=DELAY, silent=False, recipients=None, user=None,
         new_contents = get(address).text
 
         if contents != new_contents:
-            break
+            if recipients:
+                send_mail(host=host, user=user, password=password,
+                          recipients=recipients, address=address, bcc=bcc)
+            if eternal:
+                contents = new_contents
+                if not silent:
+                    print 'A change has occured at: {}'.format(address)
+            else:
+                return True
 
         if not silent:
             print datetime.now().strftime('Last Checked: %Y/%m/%d %H:%M:%S')
 
         sleep(delay)
 
-    if recipients:
-        smtp = SMTP(host)
-        smtp.starttls()
-        smtp.login(user, password)
 
-        message = MIMEText("A change has occured at: {}".format(address))
-        message['Subject'] = "A website you were watching has been updated"
+def send_mail(host, user, password, recipients, address, bcc=False):
+    smtp = SMTP(host)
+    smtp.starttls()
+    smtp.login(user, password)
 
-        if bcc:
-            for recipient in recipients:
-                smtp.sendmail(user, [recipient], message.as_string())
-        else:
-            message['To'] = ', '.join(recipients)
+    message = MIMEText("A change has occured at: {}".format(address))
+    message['Subject'] = "Polly: A website you're watching has been updated!"
+
+    if bcc:
+        for recipient in recipients:
             smtp.sendmail(user, [recipient], message.as_string())
+    else:
+        message['To'] = ', '.join(recipients)
+        smtp.sendmail(user, recipients, message.as_string())
 
-        smtp.close()
-
-    return True
+    smtp.close()
 
 
 def main():
@@ -83,6 +91,8 @@ def main():
                         help="Time (in seconds) to delay between polls.")
     parser.add_argument('--silent', action='store_true',
                         help="Don't display alerts.")
+    parser.add_argument('--eternal', action='store_true',
+                        help="Don't quit when the website changes; keep going.")
     parser.add_argument('--mail', '-m', dest='recipients', action='append',
                         help="An address to email when polling is finished "
                         "(flag can be used multiple times)")
@@ -99,7 +109,7 @@ def main():
 
     poll(args.address, delay=args.delay, silent=args.silent,
          recipients=args.recipients, user=args.user, password=args.password,
-         host=args.host, bcc=args.bcc)
+         host=args.host, bcc=args.bcc, eternal=args.eternal)
 
 
 if __name__ == '__main__':
