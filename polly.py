@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from argparse import ArgumentParser
 from datetime import datetime
 import json
@@ -45,11 +47,11 @@ def poll(address, delay=DELAY, triggers=None, formatter=None,
 
             if eternal:
                 if not silent:
-                    print 'A change has occured at: {}'.format(address)
+                    print('A change has occured at: {}'.format(address))
             else:
                 break
         elif not silent:
-            print datetime.now().strftime('Last Checked: %Y/%m/%d %H:%M:%S')
+            print(datetime.now().strftime('Last Checked: %Y/%m/%d %H:%M:%S'))
 
         sleep(delay)
 
