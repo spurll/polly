@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 from __future__ import print_function
 
 from argparse import ArgumentParser
@@ -15,7 +18,7 @@ DELAY = 60
 
 
 def poll(address, delay=DELAY, triggers=None, formatter=None,
-         silent=False, eternal=False):
+         silent=False, eternal=False, verify=True):
     """
     Poll a website for changes.
 
@@ -31,13 +34,13 @@ def poll(address, delay=DELAY, triggers=None, formatter=None,
     if '://' not in address:  # No protocol given, default to http
         address = 'http://{}'.format(address)
 
-    contents = get_content(get(address), formatter)
+    contents = get_content(get(address, verify=verify), formatter)
 
     for trigger in triggers:
         trigger.at_startup(address, contents)
 
     while True:
-        new_contents = get_content(get(address), formatter)
+        new_contents = get_content(get(address, verify=verify), formatter)
 
         if contents != new_contents:
             for trigger in triggers:
@@ -85,6 +88,8 @@ def main():
                         help="Don't display alerts.")
     parser.add_argument('--eternal', action='store_true',
                         help="Don't quit when the website changes; keep going.")
+    parser.add_argument('--ignore-ssl-cert', action='store_true',
+                        help="Don't bother to verify host SSL certificate.")
 
     parser.add_argument('--settings', help="A file containing settings")
 
@@ -128,7 +133,8 @@ def main():
                     data['formatter']['options'])
 
     poll(args.address, delay=args.delay, triggers=triggers,
-         formatter=formatter, silent=args.silent, eternal=args.eternal)
+         formatter=formatter, silent=args.silent, eternal=args.eternal,
+         verify=not args.ignore_ssl_cert)
 
 
 if __name__ == '__main__':
