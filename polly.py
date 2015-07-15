@@ -9,6 +9,7 @@ import json
 from time import sleep
 
 from requests import get
+from requests.exceptions import ConnectionError
 
 from mailtrigger import MailTrigger, SMTPHOST
 from regexformatter import RegexFormatter
@@ -40,7 +41,11 @@ def poll(address, delay=DELAY, triggers=None, formatter=None,
         trigger.at_startup(address, contents)
 
     while True:
-        new_contents = get_content(get(address, verify=verify), formatter)
+        try:
+            new_contents = get_content(get(address, verify=verify), formatter)
+        except ConnectionError as e:
+            print(e)    # In case of a connection problem, keep trying.
+            continue
 
         if contents != new_contents:
             for trigger in triggers:
