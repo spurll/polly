@@ -12,6 +12,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 
 from mailtrigger import MailTrigger, SMTPHOST
+from slacktrigger import SlackTrigger
 from regexformatter import RegexFormatter
 
 
@@ -81,7 +82,7 @@ def get_content(response, formatter=None):
 
 def main():
     potential_triggers = {trigger.get_name(): trigger for trigger in
-                          [MailTrigger]}
+                          [MailTrigger, SlackTrigger]}
     potential_formatters = {formatter.get_name(): formatter for formatter in
                             [RegexFormatter]}
 

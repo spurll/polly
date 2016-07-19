@@ -5,6 +5,7 @@ A simple website polling tool that polls a website until it changes.
 
 Requirements:
   * [requests](http://docs.python-requests.org/en/latest/index.html)
+  * [slackutils](https://github.com/spurll/slackutils)
 
 basic usage
 -----------
@@ -24,20 +25,31 @@ Unless modified using the ```--eternal``` flag, polly will quit upon detecting a
 
 triggers
 --------
-Polly is designed to trigger actions on changes. Triggers can be passed as a dict in the settings file, under the keyword ```triggers```.
+Polly is designed to trigger actions on changes. Triggers can be passed as a dict in the
+settings json file, under the keyword ```triggers```.
 
-Currently, the only supported trigger is the Mail Trigger. It's options
+Currently, the only supported triggers are ```MailTrigger``` and ```SlackTrigger```. Their options
 are as follows:
+
+```
 {
     "mail": {
-        "recipiencts": [LIST OF RECIPIENTS],
-        "bcc": true or false,  # should you put recipients in the bcc or to field
-        "username": LOGIN_USERNAME,  # if not given, it will be prompted for
-        "password": LOGIN_PASSWORD,  # if not given, it will be prompted for
-        "host": SMTP_HOST,  # defaults to gmail's host address
+        "recipients": [LIST OF RECIPIENTS],
+        "bcc": true or false,       # should you put recipients in the bcc or to field
+        "username": LOGIN_USERNAME, # if not given, it will be prompted for
+        "password": LOGIN_PASSWORD, # if not given, it will be prompted for
+        "host": SMTP_HOST,          # defaults to gmail's host address
         "subject": "A CUSTOM SUBJECT FOR THE EMAIL"
+    },
+    "slack": {
+        "recipients": [LIST OF "@user.name" AND/OR "#channel"],
+        "token": SLACK_API_TOKEN,   # if not given, it will be prompted for
+        "name": BOT_NAME            # defaults to "Polly"
+        "icon": URL_OR_EMOJI,       # defaults to ":bird:"
+        "message": "CUSTOM TEXT FOR THE MESSAGE"
     }
 }
+```
 
 email
 -----
@@ -53,11 +65,11 @@ The flag can be added multiple times:
 python polly.py ADDRESS --mail EMAIL --mail ANOTHER_EMAIL
 ```
 
-The SMTP host used is google's, unless an alternative is provided with the ```--host`` argument
+The SMTP host used is Google's, unless an alternative is provided with the ```--host``` argument
 
 Username and password can be entered securely in a prompt, or using the ```--user``` and ```--password``` arguments.
 
-The ```--bcc``` flag forces Polly to use bccfor sending to multiple addresses
+The ```--bcc``` flag forces Polly to use bcc for sending to multiple addresses
 
 Don't worry, Polly will check your login credentials at startup
 
@@ -65,7 +77,7 @@ formatters
 ----------
 Formatters provide a way for polly to format site data, so that subjections of a page may be watched.
 
-A formatter can be passed in in the settings file under the keyword ```formatter```
+A formatter can be passed in in the settings json file under the keyword ```formatter```
 
 Currently, the only supported formatted is the RegexFormatter, which applies a regex to the contents.
 It may be directly invoked using the ```--regex``` argument.
