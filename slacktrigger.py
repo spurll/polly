@@ -2,7 +2,7 @@
 Send a Slack message when polly registers a change.
 """
 from getpass import getpass
-from slackutils import Slack
+from slacker import Slacker
 
 from trigger import Trigger
 
@@ -22,23 +22,23 @@ class SlackTrigger(Trigger):
 
     def at_startup(self, address, initial):
         if self.token is None:
-            self.token = getpass('slack api token: ')
+            self.token = getpass('Slack API token: ')
 
         # authenticate and test
-        self.slack = Slack(self.token, self.name, self.icon)
-        if self.slack.error:
-            raise Exception("Slack Error: {}".format(self.slack.error))
+        self.slack = Slacker(self.token)
 
         # build message
         self.message += " A change has occurred at: {}".format(address)
 
     def on_change(self, old, new):
         for recipient in self.recipients:
-            self.slack.send(recipient, self.message, notify=True,
-                            unfurl_links=True)
-
-            if self.slack.error:
-                print("Slack Error: {}".format(self.slack.error))
+            try:
+                response = self.slack.chat.post_message(
+                    recipient, self.message, username=self.name,
+                    icon_emoji=self.icon, unfurl_links=True
+                )
+            except slacker.Error as e:
+                print("Slack Error: {}".format(e))
 
     @classmethod
     def get_name(cls):

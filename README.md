@@ -5,7 +5,7 @@ A simple website polling tool that polls a website until it changes.
 
 Requirements:
   * [requests](http://docs.python-requests.org/en/latest/index.html)
-  * [slackutils](https://github.com/spurll/slackutils)
+  * [slacker](https://github.com/os/slacker)
 
 basic usage
 -----------
@@ -45,7 +45,7 @@ are as follows:
         "recipients": [LIST OF "@user.name" AND/OR "#channel"],
         "token": SLACK_API_TOKEN,   # if not given, it will be prompted for
         "name": BOT_NAME            # defaults to "Polly"
-        "icon": URL_OR_EMOJI,       # defaults to ":bird:"
+        "icon": EMOJI,              # a Slack emoji; defaults to ":bird:"
         "message": "CUSTOM TEXT FOR THE MESSAGE"
     }
 }
